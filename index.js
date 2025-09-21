@@ -22,7 +22,7 @@ app.post("/send-contact", async(req, res)=>{
 
         const mailOptions = {
             from: email,
-            to : "saimanikantakaranam682@gmail.com",
+            to : "sahithi.priya1239@gmail.com",
             replyTo: email,
             subject:`New Contact Message from ${name}`,
             html: `<h2>Contact Form Submission</h2>
@@ -44,7 +44,7 @@ app.post("/send-appointment", async(req, res)=>{
         const {name, email, phone, date, time} = req.body;
         const mailOptions={
             from:email,
-            to:"saimanikantakaranam682@gmail.com",
+            to:"sahithi.priya1239@gmail.com",
             replyTo: email,  
             subject:`New Appointment Request from ${name}`,
             html:`<h2>Appointment Form Submission</h2>
