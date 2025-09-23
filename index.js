@@ -242,6 +242,56 @@ app.get("/all-testimonials", async (req, res) => {
   }
 });
 
+// Request OTP for forgot password
+app.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    const doctor = await Doctor.findOne({ email });
+
+    if (!doctor) return res.status(404).json({ message: "Doctor not found" });
+
+    const otp = generateOTP();
+    doctor.otp = otp;
+    doctor.otpExpiry = Date.now() + 5 * 60 * 1000; // 5 minutes
+    await doctor.save();
+
+    await sendOtp(email, otp);
+
+    res.status(200).json({ message: "OTP sent to your email for password reset" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Verify OTP and reset password
+app.post("/reset-password", async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    const doctor = await Doctor.findOne({ email });
+
+    if (!doctor) return res.status(404).json({ message: "Doctor not found" });
+
+    if (doctor.otp !== otp || doctor.otpExpiry < Date.now()) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    // Update password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    doctor.password = hashedPassword;
+
+    // Clear OTP
+    doctor.otp = null;
+    doctor.otpExpiry = null;
+
+    await doctor.save();
+
+    res.status(200).json({ message: "Password reset successful" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 
 app.listen(process.env.PORT, () => {
   console.log(`Server running on http://localhost:${process.env.PORT}`);
