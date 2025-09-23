@@ -87,6 +87,11 @@ app.post('/register-doctor', async (req, res) => {
     let doctor = await Doctor.findOne({ email });
     if (doctor) return res.status(400).json({ message: "Doctor already registered" });
 
+    const existingDoctor = await Doctor.findOne();
+    if (existingDoctor) {
+      return res.status(400).json({ message: "A doctor is already registered. Only one doctor is allowed." });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = generateOTP();
     const otpExpiry = Date.now() + 5 * 60 * 1000; // 5 minutes
